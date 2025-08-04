@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous"></script>
+
+    <title>Zeiterfassung</title>
+</head>
+<body>
+<nav>
+    <h3>Zeiterfassung</h3>
+    <ul>
+        <li><a href="/">Startseite</a></li>
+        <li><a href="/dashboard">Übersicht</a></li>
+        <li><a href="/logout">Abmelden</a></li>
+    </ul>
+</nav>
+<main>
+    <table id="dashboard" class="table table-striped">
+        <tr>
+            <th></th>
+            <th>Datum</th>
+            <th>Uhrzeit</th>
+            <th>Ein- / ausgestempelt</th>
+        </tr>
+        <% rows.forEach(function(row) { %>
+            <tr>
+                <td><%= row.id%></td>
+                <td><%= new Date(row.timestamp).toLocaleDateString() %></td>
+                <td><%= new Date(row.timestamp).toLocaleTimeString() %></td>
+                <td><%= row.operation === "in" ? "eingestempelt" : "ausgestempelt" %></td>
+            </tr>
+        <% }); %>
+    </table>
+</main>
+</body>
+</html>

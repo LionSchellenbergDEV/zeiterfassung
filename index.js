@@ -87,7 +87,7 @@ app.get('/logout', (req, res) => {
         if (err) {
             return res.status(500).send('Logout fehlgeschlagen');
         }
-        res.render("/login");
+        res.redirect("/login");
     });
 });
 
@@ -161,6 +161,26 @@ app.post("/update-data", checkAuth, async (req, res) => {
             res.status(404).send('Daten konnten nicht aktualisiert werden.');
         } else {
             res.status(200).send('Daten erfolgreich aktualisiert.')
+        }
+    } catch(error) {
+        console.error("Fehler beim aktualisieren:", error);
+    }
+})
+
+app.get('/dashboard', async (req, res) => {
+    const userId = req.session.userId;
+    try {
+        const connection = await mysql.createConnection(dbConfig);
+
+        const [rows] = await connection.execute(
+            `SELECT * FROM stamps WHERE employee_id = ?`,
+            [userId]
+        );
+
+        if(rows.length === 0) {
+            res.status(404).send('Daten konnten ausgelesen werden.');
+        } else {
+            res.render('dashboard', {rows: rows});
         }
     } catch(error) {
         console.error("Fehler beim aktualisieren:", error);
