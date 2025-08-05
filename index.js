@@ -169,23 +169,46 @@ app.post("/update-data", checkAuth, async (req, res) => {
 
 app.get('/dashboard', async (req, res) => {
     const userId = req.session.userId;
+    const role = req.session.department;
+
     try {
         const connection = await mysql.createConnection(dbConfig);
 
-        const [rows] = await connection.execute(
-            `SELECT * FROM stamps WHERE employee_id = ?`,
-            [userId]
-        );
+        let rows = [];
+        let employees = [];
 
-        if(rows.length === 0) {
-            res.status(404).send('Daten konnten ausgelesen werden.');
+        if (role === "Geschäftsführung") {
+            // Alle Stempelzeiten auslesen
+            [rows] = await connection.execute(`SELECT * FROM stamps`);
+            // Alle Mitarbeiterdaten auslesen
+            [employees] = await connection.execute(`SELECT * FROM employee`);
+
+            if (rows.length === 0 && employees.length === 0) {
+                res.status(404).send('Keine Daten gefunden.');
+            } else {
+                res.render('dashboard', { rows, employees });
+            }
+
         } else {
-            res.render('dashboard', {rows: rows});
+            // Nur eigene Stempelzeiten auslesen
+            [rows] = await connection.execute(
+                `SELECT * FROM stamps WHERE employee_id = ?`,
+                [userId]
+            );
+
+            if (rows.length === 0) {
+                res.status(404).send('Keine Daten für diesen Benutzer gefunden.');
+            } else {
+                res.render('dashboard', { rows });
+            }
         }
-    } catch(error) {
-        console.error("Fehler beim aktualisieren:", error);
+
+    } catch (error) {
+        console.error("Fehler beim Laden des Dashboards:", error);
+        res.status(500).send('Serverfehler');
     }
-})
+});
+
 
 
 app.get('/', checkAuth, async (req, res) => {
