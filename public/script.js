@@ -9,3 +9,9 @@ function setTimeStamp() {
     setTimeout(setTimeStamp, 1000);
 
 }
+
+function enableRequestBtn() {
+    const button = document.getElementById("submitRequest");
+
+    button.disabled = false;
+}

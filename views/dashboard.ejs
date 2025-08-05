@@ -6,6 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.min.js" integrity="sha384-7qAoOXltbVP82dhxHAUje59V5r2YsVfBafyUDxEdApLPmcdhBPg1DKg1ERo0BZlK" crossorigin="anonymous"></script>
@@ -22,6 +23,9 @@
     </ul>
 </nav>
 <main>
+    <% if (typeof employees !== 'undefined') { %>
+        <h1>Zeiterfassung Historie (Mitarbeiter)</h1>
+    <% } %>
     <table id="dashboard" class="table table-striped table-bordered">
         <thead>
         <tr>
@@ -33,6 +37,7 @@
             <th>Datum</th>
             <th>Uhrzeit</th>
             <th>Status</th>
+            <th>Anpassen</th>
         </tr>
         </thead>
         <tbody>
@@ -55,10 +60,53 @@
             <td><%= new Date(row.timestamp).toLocaleDateString() %></td>
             <td><%= new Date(row.timestamp).toLocaleTimeString() %></td>
             <td><%= row.operation === "in" ? "eingestempelt" : "ausgestempelt" %></td>
+            <td>
+                <form action="/request" id="request" method="POST">
+                    <input type="hidden" name="stamp_id" value="<%=row.id%>">
+                    <input type="hidden" name="user_id" value="<%=row.employee_id%>">
+                    <input type="hidden" name="old_time" value="<%= new Date(row.timestamp).toISOString().slice(0, 19).replace('T', ' ') %>">
+                    <input type="datetime-local" onchange="enableRequestBtn()" name="new_time" id="new_time">
+                    <input type="submit"  id="submitRequest" class="btn btn-success" value="speichern" disabled>
+                </form>
+            </td>
         </tr>
         <% }); %>
         </tbody>
     </table>
+
+    <% if (employees) { %>
+        <h1>Anträge</h1>
+        <table id="dashboard" class="table table-striped table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Abteilung</th>
+                <th>Alte Daten</th>
+                <th>Neue Daten</th>
+                <th>Entscheidung</th>
+            </tr>
+            </thead>
+            <tbody>
+            <% requests.forEach(function(request) {
+                let employee2 = null;
+                if (typeof employees !== 'undefined') {
+                    employee2 = employees.find(emp => emp.id === request.user_id);
+                }%>
+
+            <tr>
+                <td><%=request.id%></td>
+                <td><%=employee2.firstname%> <%= employee2.lastname %></td>
+                <td><%=employee2.department%></td>
+                <td><%=new Date(request.old_time).toLocaleDateString();%>, <%=new Date(request.old_time).toLocaleTimeString()%></td>
+                <td><%=new Date(request.new_time).toLocaleDateString()%>, <%=new Date(request.new_time).toLocaleTimeString()%></td>
+                <td><a href="/accept-request"><button class="btn btn-success">Akzeptieren</button></a>
+                    <a href="/decline-request"><button class="btn btn-danger">Ablehnen</button></a></td>
+            </tr>
+            <% });%>
+            </tbody>
+        </table>
+<% }%>
 
 
 </main>

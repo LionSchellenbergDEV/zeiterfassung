@@ -71,6 +71,7 @@ app.post('/login', async (req, res) => {
         req.session.lastname = user.lastname;
         req.session.department = user.department;
         req.session.email = user.email;
+        req.session.role = user.role;
 
 
         res.redirect("/"); // Weiterleitung nach erfolgreichem Login
@@ -167,26 +168,29 @@ app.post("/update-data", checkAuth, async (req, res) => {
     }
 })
 
-app.get('/dashboard', async (req, res) => {
+app.get('/dashboard', checkAuth, async (req, res) => {
     const userId = req.session.userId;
-    const role = req.session.department;
+    const role = req.session.role;
 
     try {
         const connection = await mysql.createConnection(dbConfig);
 
         let rows = [];
         let employees = [];
+        let requests = [];
 
-        if (role === "Geschäftsführung") {
+        if (role === "CEO") {
             // Alle Stempelzeiten auslesen
             [rows] = await connection.execute(`SELECT * FROM stamps`);
             // Alle Mitarbeiterdaten auslesen
             [employees] = await connection.execute(`SELECT * FROM employee`);
+            // Alle Mitarbeiterdaten auslesen
+            [requests] = await connection.execute(`SELECT * FROM requests`);
 
             if (rows.length === 0 && employees.length === 0) {
                 res.status(404).send('Keine Daten gefunden.');
             } else {
-                res.render('dashboard', { rows, employees });
+                res.render('dashboard', { rows, employees, requests });
             }
 
         } else {
@@ -209,6 +213,22 @@ app.get('/dashboard', async (req, res) => {
     }
 });
 
+
+
+app.post('/request', checkAuth, async (req, res) => {
+
+    try {
+        const {user_id, stamp_id, old_time, new_time} = req.body;
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            `INSERT INTO requests (user_id, stamp_id, old_time, new_time) VALUES (?, ?, ?, ?)`,
+            [user_id, stamp_id, old_time, new_time]
+        );
+    } catch (e) {
+        console.error("Fehler beim Laden des Dashboards:", e);
+    }
+    res.redirect("/dashboard");
+})
 
 
 app.get('/', checkAuth, async (req, res) => {
