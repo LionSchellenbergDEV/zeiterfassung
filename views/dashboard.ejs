@@ -100,8 +100,8 @@
                 <td><%=employee2.department%></td>
                 <td><%=new Date(request.old_time).toLocaleDateString();%>, <%=new Date(request.old_time).toLocaleTimeString()%></td>
                 <td><%=new Date(request.new_time).toLocaleDateString()%>, <%=new Date(request.new_time).toLocaleTimeString()%></td>
-                <td><a href="/accept-request"><button class="btn btn-success">Akzeptieren</button></a>
-                    <a href="/decline-request"><button class="btn btn-danger">Ablehnen</button></a></td>
+                <td><a href="/request?id=<%=request.id%>&stamp_id=<%=request.stamp_id%>&new_timestamp=<%= new Date(request.new_time).toISOString().slice(0, 19).replace('T', ' ') %>&action=accept"><button class="btn btn-success">Akzeptieren</button></a>
+                    <a href="/request?id=<%=request.id%>&stamp_id=<%=request.stamp_id%>&new_timestamp=<%= new Date(request.new_time).toISOString().slice(0, 19).replace('T', ' ') %>&action=reject"><button class="btn btn-danger">Ablehnen</button></a></td>
             </tr>
             <% });%>
             </tbody>

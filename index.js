@@ -230,6 +230,31 @@ app.post('/request', checkAuth, async (req, res) => {
     res.redirect("/dashboard");
 })
 
+app.get('/request', checkAuth, async (req, res) => {
+    const {id, new_timestamp, stamp_id, action} = req.query;
+
+    if(action === "accept") {
+        const connection = await mysql.createConnection(dbConfig);
+        await connection.execute(
+            `UPDATE stamps SET timestamp= ? WHERE id = ?`,
+            [new_timestamp, stamp_id]
+        );
+
+        await connection.execute(
+            `DELETE FROM requests WHERE id = ?`,
+            [id]
+        );
+    }
+    else if(action === "reject") {
+        await connection.execute(
+            `DELETE FROM requests WHERE id = ?`,
+            [id]
+        );
+    }
+
+
+})
+
 
 app.get('/', checkAuth, async (req, res) => {
     const {firstname, lastname, department, email} = req.session;
